@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>四曜同辉 · 星海共契</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  min-height: 100vh;
+  background-color: #03060a; 
+  font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
+  color: #fff;
+  overflow-x: hidden;
+  position: relative;
+  cursor: crosshair; 
+}
+
+/* 背景层 */
+.bg-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+}
+.bg-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.7;
+  filter: brightness(0.5) contrast(1.3) hue-rotate(-10deg);
+}
+
+/* 四根审判神光从天而降 */
+.light-beams {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  pointer-events: none;
+  overflow: hidden;
+  mix-blend-mode: screen;
+}
+.beam {
+  position: absolute;
+  top: -10vh;
+  width: 15vw;
+  height: 120vh;
+  filter: blur(30px);
+  opacity: 0.4;
+  transform-origin: top center;
+  animation: beamPulse 4s infinite alternate ease-in-out;
+}
+.beam-wolf { left: 15%; --rot: -15deg; background: linear-gradient(to bottom, rgba(255, 51, 51, 1) 0%, transparent 70%); animation-delay: 0s; }
+.beam-fox { left: 35%; --rot: -5deg; background: linear-gradient(to bottom, rgba(255, 215, 0, 1) 0%, transparent 70%); animation-delay: 1s; }
+.beam-whale { right: 35%; --rot: 5deg; background: linear-gradient(to bottom, rgba(0, 160, 255, 1) 0%, transparent 70%); animation-delay: 2s; }
+.beam-cat { right: 15%; --rot: 15deg; background: linear-gradient(to bottom, rgba(255, 51, 153, 1) 0%, transparent 70%); animation-delay: 3s; }
+
+@keyframes beamPulse {
+  0% { opacity: 0.2; filter: blur(25px); transform: scaleX(1) rotate(var(--rot)); }
+  100% { opacity: 0.7; filter: blur(40px); transform: scaleX(1.5) rotate(var(--rot)); }
+}
+
+/* 旋转审判法阵 */
+.judge-aura {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120vw;
+  height: 120vw;
+  max-width: 1800px;
+  max-height: 1800px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent, rgba(255, 215, 0, 0.1), transparent, rgba(255, 215, 0, 0.1), transparent);
+  animation: spinAura 30s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+@keyframes spinAura {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 导航与音乐 */
+.nav-back {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 1000;
+  padding: 10px 18px;
+  background: rgba(10, 20, 40, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  border-radius: 999px;
+  text-decoration: none;
+  color: #ffd700;
+  font-weight: bold;
+  transition: 0.3s;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+  backdrop-filter: blur(5px);
+}
+.nav-back:hover {
+  background: rgba(255, 215, 0, 0.2);
+  color: #fff;
+}
+.music-btn {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1000;
+  padding: 10px 18px;
+  background: rgba(10, 20, 40, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  border-radius: 999px;
+  color: #ffd700;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+  backdrop-filter: blur(5px);
+}
+.music-btn:hover {
+  background: rgba(255, 215, 0, 0.2);
+  color: #fff;
+}
+
+/* ====== 长页面滚动结构 ====== */
+.scroll-section {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 20px;
+}
+
+/* 滚动渐入 */
+.fade-in {
+  opacity: 0;
+  transform: translateY(80px);
+  transition: opacity 1.5s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.fade-in.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 第一屏：开场 */
+.title-block {
+  text-align: center;
+}
+.main-title {
+  font-size: 5rem;
+  letter-spacing: 20px;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(160, 200, 255, 0.8), 0 0 60px rgba(255, 215, 0, 0.6);
+
+  margin-bottom: 20px;
+  font-weight: 900;
+}
+.subtitle {
+  font-size: 1.5rem;
+  letter-spacing: 10px;
+  color: #9fbbff;
+  text-shadow: 0 0 15px rgba(120, 170, 255, 0.8);
+}
+
+/* 第二屏：四人聚首（大图） */
+.hero-section {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 600px;
+}
+.hero-img {
+  max-width: 70%;
+  max-height: 700px;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 50px rgba(0,0,0,0.9)) drop-shadow(0 0 50px rgba(255, 215, 0, 0.5));
+  animation: floatHero 5s ease-in-out infinite alternate;
+  z-index: 5;
+}
+@keyframes floatHero {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-20px) scale(1.02); }
+}
+
+/* 第三屏：四曜神威 */
+.skills-section {
+  width: 100%;
+  max-width: 1300px; 
+}
+.skills-title {
+  text-align: center;
+  font-size: 3rem;
+  color: #ffd700;
+  letter-spacing: 12px;
+  margin-bottom: 60px;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+}
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+}
+
+/* ✅ 档案卡外框：换成亮色毛玻璃，不黑了 */
+.skill-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08); /* 亮色半透明 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 25px;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+}
+/* 技能图：去掉了正片叠底，加上了圆角和阴影，白底也好看 */
+.skill-card img {
+  width: 100%;
+  max-height: 350px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  transition: transform 0.4s ease;
+}
+
+/* 悬停专属光晕 */
+.skill-card.fox:hover { border-color: #ffd700; box-shadow: 0 0 50px rgba(255, 215, 0, 0.3); transform: translateY(-10px); }
+.skill-card.whale:hover { border-color: #00a0ff; box-shadow: 0 0 50px rgba(0, 160, 255, 0.3); transform: translateY(-10px); }
+.skill-card.wolf:hover { border-color: #ff3333; box-shadow: 0 0 50px rgba(255, 51, 51, 0.3); transform: translateY(-10px); }
+.skill-card.cat:hover { border-color: #ff3399; box-shadow: 0 0 50px rgba(255, 51, 153, 0.3); transform: translateY(-10px); }
+
+/* 角色头部信息 */
+.char-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+.char-name {
+  font-size: 1.8rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+.tag {
+  display: inline-block;
+  font-size: 0.85rem;
+  padding: 3px 10px;
+  border-radius: 6px;
+  margin-left: 5px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.fox .char-name, .fox .tag { color: #ffd700; border-color: rgba(255,215,0,0.5); }
+.whale .char-name, .whale .tag { color: #00a0ff; border-color: rgba(0,160,255,0.5); }
+.wolf .char-name, .wolf .tag { color: #ff3333; border-color: rgba(255,51,51,0.5); }
+.cat .char-name, .cat .tag { color: #ff3399; border-color: rgba(255,51,153,0.5); }
+
+.char-core {
+  font-size: 1rem;
+  color: #d0dcec;
+  margin-bottom: 20px;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.skill-item {
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #fff;
+}
+.skill-item strong {
+  font-weight: bold;
+  font-size: 1.05rem;
+  margin-right: 5px;
+}
+.fox .skill-item strong { color: #ffd700; }
+.whale .skill-item strong { color: #00a0ff; }
+.wolf .skill-item strong { color: #ff3333; }
+.cat .skill-item strong { color: #ff3399; }
+
+.char-cost {
+  margin-top: 20px;
+  padding: 12px;
+  background: rgba(255, 0, 0, 0.2);
+  border-left: 3px solid #ff3333;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #ffb3b3;
+  line-height: 1.6;
+}
+
+.char-quote {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  color: #fff;
+  letter-spacing: 2px;
+}
+.fox .char-quote { color: #ffd700; }
+.whale .char-quote { color: #00a0ff; }
+.wolf .char-quote { color: #ff3333; }
+.cat .char-quote { color: #ff3399; }
+
+/* 第四屏：交错合照 */
+.gallery-section {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  gap: 100px;
+}
+.frame-box {
+  position: relative;
+  width: 65%;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 18px;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  transition: all 0.5s ease;
+}
+.frame-box:nth-child(1) { align-self: flex-start; transform: rotate(-3deg) translateY(30px); }
+.frame-box:nth-child(2) { align-self: flex-end; transform: rotate(3deg) translateY(-30px); }
+.gallery-section.show .frame-box:nth-child(1) { transform: rotate(-2deg) translateY(0); }
+.gallery-section.show .frame-box:nth-child(2) { transform: rotate(2deg) translateY(0); }
+.frame-box:hover {
+  transform: scale(1.05) rotate(0deg) !important;
+  border-color: rgba(255, 215, 0, 1);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.9), 0 0 50px rgba(255, 215, 0, 0.4);
+  z-index: 20;
+}
+.frame-box img {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+
+/* 第五屏：手势舞 */
+.video-section {
+  width: 100%;
+  max-width: 1000px;
+  margin-top: 40px;
+  position: relative;
+}
+.video-section::before {
+  content: '· 羁 绊 共 鸣 ·';
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffd700;
+  letter-spacing: 8px;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.video-box {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 20px;
+  border-radius: 20px;
+  border: 2px solid rgba(120, 170, 255, 0.5);
+  box-shadow: 0 0 60px rgba(120, 170, 255, 0.3);
+}
+.video-box video {
+  width: 100%;
+  border-radius: 10px;
+  display: block;
+}
+
+/* 第六屏：友谊宣言与终极结语 */
+.friendship-text {
+  text-align: center;
+  max-width: 1000px;
+  padding: 60px 40px;
+}
+.friendship-text h3 {
+  font-size: 3rem;
+  color: #ffd700;
+  margin-bottom: 30px;
+  letter-spacing: 12px;
+}
+.friendship-text p {
+  font-size: 1.4rem;
+  line-height: 2.2;
+  color: #fff;
+  letter-spacing: 3px;
+}
+
+.final-words {
+  margin-top: 60px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255, 215, 0, 0.3);
+  font-size: 2.2rem;
+  font-weight: bold;
+  letter-spacing: 8px;
+  color: #ffd700;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+}
+
+/* ====== 特效 ====== */
+.spark {
+  position: fixed;
+  bottom: -20px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 50;
+  animation: rise linear forwards;
+}
+@keyframes rise {
+  0% { opacity: 0; transform: translateY(0) translateX(0) scale(1); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-120vh) translateX(var(--drift, 50px)) scale(0.2); }
+}
+
+/* ✅ 漂浮的专属元素：去掉了正片叠底，加上了透明度和圆角，防止白底突兀 */
+.element-float {
+  position: fixed;
+  pointer-events: none;
+  z-index: 45;
+  opacity: 0;
+  border-radius: 50%; /* 如果白底是方的，加个圆形可能没那么突兀 */
+  animation: floatElement linear forwards;
+  /* 去掉了 mix-blend-mode: multiply; */
+}
+@keyframes floatElement {
+  0% { opacity: 0; transform: translateY(0) rotate(0deg); }
+  10% { opacity: 0.7; } /* 透明度稍微降低，融进背景 */
+  90% { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(-100vh) translateX(var(--ex, 100px)) rotate(360deg); }
+}
+
+/* 响应式 */
+@media (max-width: 1000px) {
+  .skills-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .main-title { font-size: 3rem; letter-spacing: 10px; }
+  .subtitle { font-size: 1.2rem; }
+  .hero-img { max-width: 90%; }
+  .frame-box { width: 90%; }
+  .friendship-text h3 { font-size: 2rem; letter-spacing: 5px; }
+  .friendship-text p { font-size: 1.1rem; }
+  .final-words { font-size: 1.4rem; letter-spacing: 3px; }
+  .beam { width: 20vw; }
+  .char-header { flex-direction: column; align-items: flex-start; }
+  .char-tags { margin-top: 10px; text-align: left; }
+}
+</style>
+</head>
+<body>
+
+<!-- 背景层 -->
+<div class="bg-wrap">
+  <img src="../image/judge_bg.jpg" alt="审判庭背景">
+</div>
+
+<!-- 四根审判神光 -->
+<div class="light-beams">
+  <div class="beam beam-wolf"></div>
+  <div class="beam beam-fox"></div>
+  <div class="beam beam-whale"></div>
+  <div class="beam beam-cat"></div>
+</div>
+
+<!-- 旋转法阵 -->
+<div class="judge-aura"></div>
+
+<!-- 导航与音乐 -->
+<a href="../index.html" class="nav-back">返回审判之页</a>
+<button class="music-btn" id="musicBtn">静候审判</button>
+<audio id="bgm" src="../image/four_song.mp3" loop></audio>
+
+<!-- 第一屏：开场 -->
+<div class="scroll-section">
+  <div class="title-block fade-in">
+    <h1 class="main-title">四曜同辉</h1>
+    <p class="subtitle">审判降临 · 星海共契</p>
+  </div>
+</div>
+
+<!-- 第二屏：四人聚首大图 -->
+<div class="scroll-section">
+  <div class="hero-section fade-in">
+    <img class="hero-img" src="../image/four_hero.jpg" alt="四人角色合影">
+  </div>
+</div>
+
+<!-- 第三屏：四曜神威（技能档案） -->
+<div class="scroll-section">
+  <div class="skills-section fade-in">
+    <h2 class="skills-title">四曜神威</h2>
+    <div class="skills-grid">
+      
+      <!-- 狼王技能 -->
+      <div class="skill-card wolf">
+        <img src="../image/skill_wolf.jpg" alt="狼王技能">
+        <div class="char-header">
+          <div class="char-name">梁晶晶</div>
+          <div class="char-tags">
+            <span class="tag">断码孤狼</span>
+            <span class="tag">控制系</span>
+          </div>
+        </div>
+        <div class="char-core">核心：二进制代码操控。改写目标的运行逻辑，锁死行动、篡改指令，擅长控场、封印、读取敌方信息。</div>
+        <div class="skill-list">
+          <div class="skill-item"><strong>【被动·源码视界】</strong> 视野里一切目标都会浮现数据流，能看穿对方异能运转漏洞、预判技能轨迹；对机械、构造类目标效果翻倍。</div>
+          <div class="skill-item"><strong>【小技·锁元码链】</strong> 抛出红黑代码锁链，捆缚敌人，冻结对方异能运转3秒，被捆期间无法释放大招；可同时束缚2个目标。</div>
+          <div class="skill-item"><strong>【小技·漏洞注入】</strong> 向对方异能里写入错误代码，使其技能短暂反向（攻击打到自身、护盾失效）。</div>
+          <div class="skill-item"><strong>【大招·归零审判】</strong> 铺开大片代码领域，领域内所有敌人行动、异能强制停滞5秒；领域关闭后会短暂抹除敌人一段能力记忆。</div>
+        </div>
+        <div class="char-cost"><strong>代价：</strong>大量消耗精神，长时间使用双眼会布满红色数据流，过载会短暂失明。</div>
+        <div class="char-quote">“万物皆有源码，我执笔，便可令一切归于沉寂。”</div>
+      </div>
+
+      <!-- 黑猫技能 -->
+      <div class="skill-card cat">
+        <img src="../image/skill_cat.jpg" alt="黑猫技能">
+        <div class="char-header">
+          <div class="char-name">孙佳缘</div>
+          <div class="char-tags">
+            <span class="tag">碎界锚猫</span>
+            <span class="tag">攻击系</span>
+          </div>
+        </div>
+        <div class="char-core">核心：千锤百炼·空间形态重塑。撕裂、折叠、重构空间，远近爆发兼备，可造掩体、造裂隙斩击，突进收割。</div>
+        <div class="skill-list">
+          <div class="skill-item"><strong>【被动·锚定感知】</strong> 感知空间褶皱，无视大部分地形障碍，短距空间闪烁无冷却（冷却极短），能感知隐藏在夹缝里的敌人。</div>
+          <div class="skill-item"><strong>【小技·裂隙斩】</strong> 指尖撕开空间，飞出黑色刃光，刃边缠绕粉色重构纹路，切割无视普通物理护甲。</div>
+          <div class="skill-item"><strong>【小技·筑界囚笼】</strong> 折叠一小块空间，把敌人关进密闭空间立方体，可挤压造成持续伤害，也能用来保护队友。</div>
+          <div class="skill-item"><strong>【大招·万象重铸】</strong> 大范围撕碎周遭空间，碎片形成风暴绞杀敌人；风暴结束后可以重新重塑一块区域地形（造高台、壁垒、陷阱）。</div>
+        </div>
+        <div class="char-cost"><strong>代价：</strong>空间撕裂会反噬自身骨骼，频繁开大后肢体酸痛，严重时空间能力会短暂紊乱，随机乱闪。</div>
+        <div class="char-quote">“空间由我锤塑，前路与牢笼，皆由我定。”</div>
+      </div>
+
+      <!-- 白鲸技能 -->
+      <div class="skill-card whale">
+        <img src="../image/skill_whale.jpg" alt="白鲸技能">
+        <div class="char-header">
+          <div class="char-name">黄玉瑞</div>
+          <div class="char-tags">
+            <span class="tag">沧溟圣白</span>
+            <span class="tag">辅助系</span>
+          </div>
+        </div>
+        <div class="char-core">核心：生命之王，操纵生机、吸收、转化。治疗、续航、增益，汲取敌方生机转化为己方资源，能维系整个审判庭的生存线。</div>
+        <div class="skill-list">
+          <div class="skill-item"><strong>【被动·鲸息共鸣】</strong> 自身持续散发温和生命场，缓慢持续愈合周围队友轻伤；可以感知方圆内所有生命强弱。</div>
+          <div class="skill-item"><strong>【小技·生潮渡愈】</strong> 释放淡青生命浪潮，大范围治疗伤势，解除中毒、侵蚀、衰弱等负面状态。</div>
+          <div class="skill-item"><strong>【小技·枯荣汲取】</strong> 对准敌人抽取生机，削弱对方体能与异能输出，汲取的生机可以储存，留给队友应急。</div>
+          <div class="skill-item"><strong>【大招·沧溟命契】</strong> 召唤白鲸灵影，展开巨型生命结界；结界内队友受伤先消耗储存的生机而非自身，濒死时触发一次强制续命；也可以反向释放，大范围剥夺敌方生机。</div>
+        </div>
+        <div class="char-cost"><strong>代价：</strong>生机是等价交换，强行续命会透支自己的生命力，使用剥夺类技能时情绪会持续变冷。</div>
+        <div class="char-quote">“生由潮起，枯随浪沉，我执掌众生生机的天平。”</div>
+      </div>
+
+      <!-- 狐狸技能 -->
+      <div class="skill-card fox">
+        <img src="../image/skill_fox.jpg" alt="狐狸技能">
+        <div class="char-header">
+          <div class="char-name">王若曦</div>
+          <div class="char-tags">
+            <span class="tag">金瞳狐判</span>
+            <span class="tag">侧攻系</span>
+          </div>
+        </div>
+        <div class="char-core">核心：金钱概率把控，赌局博弈、改写胜负概率。不直接强攻，设下赌约，扭曲事件概率，预判博弈，制造“必然胜利”，战术欺诈。</div>
+        <div class="skill-list">
+          <div class="skill-item"><strong>【被动·金瞳算轨】</strong> 一眼看穿一件事的基础概率，高速推演所有走向，在博弈对局里天然占据优势；随身筹码（筹码、骰子、卡牌）是能力媒介。</div>
+          <div class="skill-item"><strong>【小技·赌局改运】</strong> 和单个目标定下临时赌约，指定一个结果（“你的这一击落空”“我方闪避成功”），抬高该事件发生概率；赌约失败，自身会承受反噬。</div>
+          <div class="skill-item"><strong>【小技·筹码覆局】</strong> 抛出金色筹码阵，在阵内随机生成有利或者不利的概率节点，干扰敌方命中率、技能暴击。</div>
+          <div class="skill-item"><strong>【大招·定盘之赌】</strong> 开启终极赌局，强制划定一个胜负判定，在短时间内，让己方关键一击成为“既定事实”；代价极大，一局只能赌一次。</div>
+        </div>
+        <div class="char-cost"><strong>代价：</strong>每一次强行拉高胜率，都要支付对应的因果代价，赌约越大，反噬越重，连续开大容易被命运反噬，霉运缠身。</div>
+        <div class="char-quote">“命运是一场赌局，而我，永远握有最优筹码。”</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 第四屏：交错合照 -->
+<div class="scroll-section">
+  <div class="gallery-section fade-in">
+    <div class="frame-box">
+      <img src="../image/four_pic_01.jpg" alt="四人合照一">
+    </div>
+    <div class="frame-box">
+      <img src="../image/four_pic_02.jpg" alt="四人合照二">
+    </div>
+  </div>
+</div>
+
+<!-- 第五屏：手势舞共鸣 -->
+<div class="scroll-section">
+  <div class="video-section fade-in">
+    <div class="video-box">
+      <video src="../image/hand_dance.mp4" controls playsinline></video>
+    </div>
+  </div>
+</div>
+
+<!-- 第六屏：友谊宣言 -->
+<div class="scroll-section">
+  <div class="friendship-text fade-in">
+    <h3>星海同契</h3>
+    <p>从密林的橙风，到深海的鲸鸣；<br>从红黑星空的蛰伏，到带刺玫瑰的桀骜。<br>四道截然不同的轨迹，在审判庭前交汇。<br>我们是彼此最坚硬的后盾，也是浩瀚星海里唯一的共鸣。</p>
+    
+    <!-- 原话结语 -->
+    <div class="final-words">这是我们审判的终章，亦将是我们友谊的长存</div>
+  </div>
+</div>
+
+<script>
+// 音乐开关
+const musicBtn = document.getElementById("musicBtn");
+const bgm = document.getElementById("bgm");
+let playing = false;
+musicBtn.onclick = () => {
+  if (!playing) {
+    bgm.play().catch(e => console.log("等待交互播放:", e));
+    musicBtn.innerText = "四曜共鸣";
+    playing = true;
+  } else {
+    bgm.pause();
+    musicBtn.innerText = "静候审判";
+    playing = false;
+  }
+}
+
+// 滚动淡入特效
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add("show");
+    }
+  });
+}, { threshold: 0.2 });
+
+document.querySelectorAll('.fade-in').forEach(el => {
+  observer.observe(el);
+});
+
+// 特效：金色星火
+function spawnSpark() {
+  const spark = document.createElement("div");
+  spark.className = "spark";
+  spark.style.left = Math.random() * window.innerWidth + "px";
+  
+  const size = Math.random() * 5 + 1;
+  spark.style.width = size + "px";
+  spark.style.height = size + "px";
+  
+  const colors = ['#ffd700', '#00a0ff', '#ff3333', '#ff3399'];
+  spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+  spark.style.boxShadow = `0 0 10px ${spark.style.background}`;
+
+  const drift = (Math.random() - 0.5) * 300;
+  spark.style.setProperty('--drift', drift + "px");
+  
+  const duration = 2000 + Math.random() * 3000;
+  spark.style.animationDuration = duration + "ms";
+  
+  document.body.appendChild(spark);
+  setTimeout(() => spark.remove(), duration);
+}
+setInterval(spawnSpark, 60);
+
+// 特效：16 种专属元素飞舞
+const elements = [];
+const prefixes = ['fox', 'whale', 'wolf', 'cat'];
+prefixes.forEach(prefix => {
+  for (let i = 1; i <= 4; i++) {
+    const num = i.toString().padStart(2, '0');
+    elements.push(`../image/ele_${prefix}_${num}.jpg`); 
+  }
+});
+
+function spawnElement() {
+  const el = document.createElement("img");
+  el.className = "element-float";
+  el.src = elements[Math.floor(Math.random() * elements.length)];
+  
+  el.style.left = Math.random() * window.innerWidth + "px";
+  el.style.bottom = "-50px";
+  
+  // 稍微缩小一点元素，因为有了白底，太大会挡视线
+  const size = Math.random() * 30 + 20; 
+  el.style.width = size + "px";
+  
+  const drift = (Math.random() - 0.5) * 400;
+  el.style.setProperty('--ex', drift + "px");
+  
+  const duration = 5000 + Math.random() * 4000;
+  el.style.animationDuration = duration + "ms";
+  
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+setInterval(spawnElement, 600);
+</script>
+</body>
+</html>

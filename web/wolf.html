@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>狼王 · 烬野为王</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css" />
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+body{
+  min-height:100vh;
+  overflow-x:hidden;
+  font-family:"LXGW WenKai", serif;
+  position:relative;
+}
+.bg-main{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  background:url("../image/wolf_castle_redmoon.jpg") center/cover no-repeat;
+}
+.bg-main::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(10,3,3,0.62);
+}
+.container{
+  position:relative;
+  z-index:2;
+  max-width:1140px;
+  margin:0 auto;
+  padding:40px 24px;
+}
+.judgement-back{
+  position:fixed;
+  left:24px;
+  top:24px;
+  z-index:99;
+  padding:12px 24px;
+  border:1px solid #881818;
+  color:#d4af37;
+  text-decoration:none;
+  border-radius:999px;
+  background:rgba(60,8,8,0.68);
+  transition:0.3s;
+  font-family:"LXGW WenKai", serif;
+}
+.judgement-back:hover{
+  background:rgba(110,15,15,0.78);
+  box-shadow:0 0 18px #991a1a;
+}
+.audio-btn{
+  position:fixed;
+  right:24px;
+  top:24px;
+  z-index:99;
+  padding:12px 20px;
+  border:1px solid #881818;
+  color:#d4af37;
+  border-radius:999px;
+  background:rgba(60,8,8,0.68);
+  cursor:pointer;
+  transition:0.3s;
+  font-family:"LXGW WenKai", serif;
+}
+.audio-btn:hover{
+  box-shadow:0 0 18px #991a1a;
+}
+.title-wrap{
+  width: fit-content;
+  margin:0 auto 70px;
+}
+.title-img{
+  width: 440px;
+  height:auto;
+  display:block;
+}
+.card{
+  position:relative;
+  margin-bottom:52px;
+  display:flex;
+  gap:30px;
+  align-items:center;
+  min-height:340px;
+  padding:32px;
+  overflow:hidden;
+  border-radius:14px;
+}
+.card-decor{
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0.82;
+}
+.card-photo{
+  width:340px;
+  max-width:100%;
+  border-radius:10px;
+  position:relative;
+  z-index:2;
+}
+.card-text{
+  position:relative;
+  z-index:2;
+  flex: 1;
+  padding:10px;
+}
+.card-text h3{
+  margin-bottom:14px;
+  letter-spacing:2px;
+  font-size:1.45rem;
+  font-family:"LXGW WenKai", serif;
+}
+.card-text p{
+  line-height:1.85;
+  font-family:"LXGW WenKai", serif;
+}
+/* 红衬底：暗金质感，不土 */
+.card-red .card-text{
+  color:#bfa375;
+  text-shadow:
+    0 0 6px #000,
+    0 0 12px #1a0f08,
+    0 0 18px rgba(0,0,0,0.8);
+}
+.card-red .card-text h3{
+  color:#d9c79a;
+  text-shadow:
+    0 0 8px #000,
+    0 0 16px #2a1a0a,
+    0 0 24px rgba(255, 200, 120, 0.35);
+}
+/* 暗黑衬底：冷银灰 */
+.card-dark .card-text{
+  color:#a8b0bc;
+  text-shadow:
+    0 0 6px #000,
+    0 0 12px #05070a,
+    0 0 18px rgba(0,0,0,0.9);
+}
+.card-dark .card-text h3{
+  color:#cfd6e2;
+  text-shadow:
+    0 0 8px #000,
+    0 0 16px #0a1020,
+    0 0 24px rgba(180, 210, 255, 0.3);
+}
+.contract-block{
+  position:relative;
+  margin:90px 0 60px;
+  padding:40px;
+  overflow:hidden;
+  border-radius:14px;
+  min-height:280px;
+}
+.contract-decor{
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0.82;
+}
+.contract-block p{
+  position:relative;
+  z-index:2;
+  color:#c8b88c;
+  font-family:"LXGW WenKai", serif;
+  line-height:2;
+  text-align:center;
+  font-size:1.15rem;
+  letter-spacing:1px;
+  text-shadow:
+    0 0 8px #000,
+    0 0 14px #1a1208,
+    0 0 22px rgba(0,0,0,0.9);
+}
+.bottom-link{
+  display:block;
+  text-align:center;
+  color:#bfa375;
+  font-size:1.15rem;
+  margin-top:20px;
+  text-shadow: 0 0 6px #000;
+  font-family:"LXGW WenKai", serif;
+}
+@media (max-width:760px){
+  .card{flex-direction:column; text-align:center;}
+  .title-img{width:92%;}
+  .card-photo{width:92%;}
+}
+.rule-popup{
+  position:fixed;
+  z-index:888;
+  color:#990000;
+  font-family:"LXGW WenKai", serif;
+  font-weight:bold;
+  font-size:1.5rem;
+  letter-spacing:2px;
+  text-shadow:
+    0 0 9px #000000,
+    0 0 16px #200000;
+  pointer-events:none;
+  animation:ruleFade 2.4s forwards;
+}
+@keyframes ruleFade{
+  0%{opacity:0;transform:scale(0.85);}
+  20%{opacity:1;transform:scale(1);}
+  75%{opacity:1;transform:scale(1);}
+  100%{opacity:0;transform:scale(1.08);}
+}
+.blood-thread{
+  position:fixed;
+  pointer-events:none;
+  z-index:9999;
+  height:1px;
+  background:linear-gradient(90deg, rgba(90,0,0,0) 0%, rgba(110,0,0,0.55) 20%, rgba(140,0,0,0.75) 50%, rgba(110,0,0,0.55) 80%, rgba(90,0,0,0) 100%);
+  filter:blur(0.4px);
+  transform-origin:left center;
+  box-shadow:
+    0 0 1px #220000,
+    0 0 2px #440000;
+}
+/* 火星：最高层级，从底部向上飘 */
+.spark{
+  position:fixed;
+  left:0;
+  top:0;
+  pointer-events:none;
+  z-index:99999;
+  width:5px;
+  height:5px;
+  background:#ffcf66;
+  border-radius:50%;
+  box-shadow:
+    0 0 8px #ff9933,
+    0 0 14px #ff6a00,
+    0 0 22px rgba(255,120,0,0.45);
+  opacity:0.9;
+  will-change:transform, opacity;
+}
+.flash-red{
+  position:fixed;
+  inset:0;
+  background:rgba(180,0,0,0.28);
+  z-index:800;
+  pointer-events:none;
+  animation:flash 0.35s;
+}
+@keyframes flash{
+  0%{opacity:1;}
+  100%{opacity:0;}
+}
+</style>
+</head>
+<body>
+<div class="bg-main"></div>
+
+<a href="../index.html" class="judgement-back">返回审判之页</a>
+<button class="audio-btn" id="playBgm">聆烬野回响</button>
+
+<div class="container">
+  <div class="title-wrap">
+    <img class="title-img" src="../image/wolf_title.jpg" alt="狼王 · 烬野为王">
+  </div>
+
+  <!-- 第一块：wolf_hand_cross｜暗黑底 冷银灰字 -->
+  <div class="card card-dark">
+    <img class="card-decor" src="../image/wolf_hand_cross.jpg" alt="">
+    <img class="card-photo" src="../image/wolf_1.jpg">
+    <div class="card-text">
+      <h3>孤野初生</h3>
+      <p>荒原没有赐给他庇护，只塞来凛冽长风。自踏出巢穴那一刻起，他便知晓世间从无理所当然的温柔。所有生路，都要靠自己一步一步踏出来；所有尊严，只能以獠牙与傲骨守住。荒野的第一声狼嚎，不是求救，是宣告。</p>
+    </div>
+  </div>
+
+  <!-- 第二块：wolf_hand_rose｜红底 暗金字 -->
+  <div class="card card-red">
+    <img class="card-decor" src="../image/wolf_hand_rose.jpg" alt="">
+    <img class="card-photo" src="../image/wolf_2.jpg">
+    <div class="card-text">
+      <h3>同途羁旅</h3>
+      <p>独行久了，才会遇见能听懂自己呼啸的知己。不必多言，一眼便能读懂彼此背负的重量。前路依旧漫长且凶险，但从此不再独自沉入长夜；互为刃，互为依靠，一起走过荒凉旷野。</p>
+    </div>
+  </div>
+
+  <!-- 第三块：wolf_statue｜暗黑底 冷银灰字 -->
+  <div class="card card-dark">
+    <img class="card-decor" src="../image/wolf_statue.jpg" alt="">
+    <img class="card-photo" src="../image/wolf_3.jpg">
+    <div class="card-text">
+      <h3>冕下之影</h3>
+      <p>王冠从来不是馈赠，是无数厮杀沉淀下来的重担。身后是托付于他的信任，前方是永不停歇的风暴。他把脆弱藏进暗影之中，以一身沉稳撑起整片荒原。威严之下，是绝不弯折的脊梁。</p>
+    </div>
+  </div>
+
+  <!-- 第四块：wolf_hand_rose｜红底 暗金字 -->
+  <div class="card card-red">
+    <img class="card-decor" src="../image/wolf_hand_rose.jpg" alt="">
+    <img class="card-photo" src="../image/wolf_4.jpg">
+    <div class="card-text">
+      <h3>烬野长鸣</h3>
+      <p>过往的硝烟化作旷野里的余烬，但属于狼王的长鸣不会沉寂。岁月磨不去骨子里的桀骜，只要长风尚在，他就会守住约定，等候知己重逢，在这片荒原永远为王。</p>
+    </div>
+  </div>
+
+  <!-- 契约区块：wolf_heart_frame -->
+  <div class="contract-block">
+    <img class="contract-decor" src="../image/wolf_heart_frame.jpg" alt="">
+    <p>听好了，我是藏在星空之下的狼王。<br><br>
+旁人眼里我沉默疏离，自带压迫感，沉静时自带威压，不轻易言语，不迎合世俗的热闹，不喜虚与委蛇，不爱无谓争辩，静时如山，动时携风，内敛之下藏着不破的野心。<br><br>
+闲时奔赴球场挥汗，也沉心敲写代码、调试程序，耳机隔绝纷扰，在二进制的世界里搭建秩序，暗夜星野之中，我是沉敛蛰伏的猎手，目光所至，心意笃定不移。<br><br>
+沉静是外壳，热烈是埋在骨血里独一份的热忱。<br><br>
+很多人只看见我不动声色的凛冽，觉得我冷淡难靠近，寡言疏离，评价来来去去，有人敬畏这份沉稳，也有人揣测我的漠然。赞誉与非议来来往往，在星海之间浮沉。<br><br>
+可只有我自己清楚，我整片星河翻涌的偏爱，只留给咪咪。<br><br>
+我可以漠视世间所有嘈杂，风波扑面便稳稳接住，任凭旁人的流言纷至沓来。狼眸可望穿长夜迷雾，所有隐忍与滚烫，尽数奔赴向我的咪咪。<br><br>
+我敛去一身狼啸里的戾气，把星空下最虔诚的温柔，单单交付于你。<br><br>
+锋芒留给长夜与风浪，满心赤诚只予咪咪。<br><br>
+我是蛰伏于红黑星空的狼王，任凭世事喧嚣起落，我的偏爱，永远属于孙佳缘。</p>
+  </div>
+
+  <a href="contact_wolf_cat.html" class="bottom-link">前往契约块</a>
+</div>
+
+<audio id="bgm" src="../image/wolf_audio.mp3" loop>
+
+<script>
+const btn = document.getElementById("playBgm");
+const audio = document.getElementById("bgm");
+btn.onclick = ()=>{
+  audio.play();
+  btn.innerText = "封荒原声息";
+  btn.disabled = true;
+};
+
+const threads = [];
+const threadCount = 12;
+
+for(let i = 0; i < threadCount; i++){
+  const t = document.createElement("div");
+  t.className = "blood-thread";
+  document.body.appendChild(t);
+  threads.push({
+    el: t,
+    x: 0,
+    y: 0,
+    len: 0,
+    angle: 0,
+    life: 0
+  });
+}
+
+let lastX = 0;
+let lastY = 0;
+
+document.addEventListener("mousemove", e=>{
+  const x = e.clientX;
+  const y = e.clientY;
+
+  let dx = x - lastX;
+  let dy = y - lastY;
+  let dist = Math.hypot(dx, dy);
+
+  if(dist > 6){
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+    for(let i = 0; i < 2; i++){
+      const free = threads.find(t => t.life <= 0);
+      if(free){
+        free.x = lastX;
+        free.y = lastY;
+        free.len = Math.min(dist * (0.45 + Math.random() * 0.35), 110);
+        free.angle = angle + (Math.random() * 14 - 7);
+        free.life = 1;
+      }
+    }
+  }
+
+  lastX = x;
+  lastY = y;
+});
+
+function animateBloodThreads(){
+  threads.forEach(t =>{
+    if(t.life > 0){
+      t.life -= 0.018;
+
+      if(t.life <= 0){
+        t.el.style.display = "none";
+        return;
+      }
+
+      t.el.style.display = "block";
+      t.el.style.left = t.x + "px";
+      t.el.style.top = t.y + "px";
+      t.el.style.width = t.len * t.life + "px";
+      t.el.style.transform = "rotate(" + t.angle + "deg)";
+      t.el.style.opacity = t.life * 0.85;
+      t.el.style.background =
+        "linear-gradient(90deg, rgba(90,0,0," + (0.2 * t.life) + ") 0%, rgba(120,0,0," + (0.55 * t.life) + ") 40%, rgba(150,0,0," + (0.75 * t.life) + ") 100%)";
+    }
+  });
+
+  requestAnimationFrame(animateBloodThreads);
+}
+animateBloodThreads();
+
+const ruleList = [
+  "请勿直视狼王的眼睛。",
+  "听见狼嚎，请不要出声应答。",
+  "门边的血契红绳，请勿触碰。",
+  "不要吹灭城堡里任何一盏烛火。",
+  "如果遇见长廊黑影，请不要搭话。",
+  "请勿在此诋毁盟约之中的同伴。",
+  "月圆之夜，不要独自登上尖塔。",
+  "离开狼堡的时候，不要回望镜厅"
+];
+
+setInterval(()=>{
+  const el = document.createElement("div");
+  el.className = "rule-popup";
+  el.innerText = ruleList[Math.floor(Math.random() * ruleList.length)];
+  el.style.left = Math.random() * 75 + "%";
+  el.style.top = Math.random() * 75 + "%";
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2400);
+
+  if(Math.random() > 0.65){
+    const flash = document.createElement("div");
+    flash.className = "flash-red";
+    document.body.appendChild(flash);
+    setTimeout(()=>flash.remove(),350);
+  }
+
+  // 火星：从底部向上飘
+  for(let s=0;s<3;s++){
+    const spark = document.createElement("div");
+    spark.className = "spark";
+    const startX = Math.random() * window.innerWidth;
+    const startY = window.innerHeight + 20;
+    const endY = -40 - Math.random() * 120;
+    const drift = (Math.random() - 0.5) * 120;
+
+    spark.style.left = startX + "px";
+    spark.style.top = startY + "px";
+    spark.style.transform = "translate(0, 0) scale(0.8)";
+    spark.style.opacity = "0";
+
+    document.body.appendChild(spark);
+
+    requestAnimationFrame(()=>{
+      spark.style.transition = "transform 4.2s linear, opacity 1.4s ease-out";
+      spark.style.transform = `translate(${drift}px, ${endY - startY}px) scale(1.15)`;
+      spark.style.opacity = "0.95";
+    });
+
+    setTimeout(()=>{
+      spark.style.transition = "opacity 0.8s ease-out";
+      spark.style.opacity = "0";
+      setTimeout(()=>spark.remove(), 900);
+    }, 3400);
+  }
+},2500);
+</script>
+</body>
+</html>

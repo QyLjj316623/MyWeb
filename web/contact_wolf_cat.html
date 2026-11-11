@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>狼猫 · 暗夜盟约</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: #050505;
+  color: #e0d8c8;
+  font-family: "STKaiti", "KaiTi", "楷体", serif;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+
+/* 顶部天鹅绒帷幕（开场覆盖层） */
+.curtain-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transition: opacity 1s ease 1.5s, visibility 1s ease 1.5s;
+}
+.curtain-wrap.opened {
+  opacity: 0;
+  visibility: hidden;
+}
+.curtain-left, .curtain-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background-image: url('../image/wc_curtain.jpg');
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 50px rgba(0,0,0,0.9);
+  transition: transform 2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.curtain-left {
+  left: 0;
+  background-position: left center;
+  border-right: 2px solid #111;
+}
+.curtain-right {
+  right: 0;
+  background-position: right center;
+  border-left: 2px solid #111;
+}
+.curtain-wrap.opened .curtain-left {
+  transform: translateX(-100%);
+}
+.curtain-wrap.opened .curtain-right {
+  transform: translateX(100%);
+}
+
+/* 背景层 - 已调亮 */
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+}
+.bg-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+  filter: brightness(0.75) contrast(1.1) sepia(0.15); 
+}
+/* 边缘暗角 - 减弱了死黑感 */
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  box-shadow: inset 0 0 120px rgba(0,0,0,0.8), inset 0 0 60px rgba(80, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+/* 导航与音乐按钮 */
+.nav-back {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 1000;
+  padding: 10px 18px;
+  background: rgba(20, 10, 10, 0.85);
+  border: 1px solid rgba(139, 0, 0, 0.6);
+  border-radius: 4px;
+  text-decoration: none;
+  color: #d4af37;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(139, 0, 0, 0.4);
+  transition: 0.3s;
+  font-family: "Microsoft Yahei", sans-serif;
+}
+.nav-back:hover {
+  background: rgba(50, 10, 10, 0.95);
+  color: #ff3333;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+}
+.music-btn {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1000;
+  padding: 10px 18px;
+  background: rgba(20, 10, 10, 0.85);
+  border: 1px solid rgba(139, 0, 0, 0.6);
+  border-radius: 4px;
+  color: #d4af37;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(139, 0, 0, 0.4);
+  transition: 0.3s;
+  font-family: "Microsoft Yahei", sans-serif;
+  cursor: pointer;
+}
+.music-btn:hover {
+  background: rgba(50, 10, 10, 0.95);
+  color: #ff3333;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+}
+
+/* 长廊内容 */
+.long-container {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 150px 20px;
+  z-index: 10;
+}
+
+/* 顶部契约信区域 */
+.top-contract {
+  text-align: center;
+  margin-bottom: 150px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 1.5s ease, transform 1.5s ease;
+}
+.top-contract.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.top-contract img {
+  width: 60%;
+  max-width: 500px;
+  border: 10px solid rgba(20,10,10,0.8);
+  box-shadow: 0 0 30px rgba(139, 0, 0, 0.6);
+  position: relative;
+}
+
+/* 画廊交错区块 */
+.gallery-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 120px;
+  opacity: 0;
+  transform: translateY(80px);
+  transition: all 1.2s ease;
+}
+.gallery-item.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.gallery-item:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+/* 合照画框 */
+.pic-box {
+  width: 55%;
+  position: relative;
+}
+.pic-box img {
+  width: 100%;
+  border: 12px solid #2a2015;
+  outline: 2px solid #8b0000;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.8);
+  transition: transform 0.4s ease;
+}
+.pic-box img:hover {
+  transform: scale(1.03);
+}
+
+/* 文案区域 */
+.text-box {
+  width: 40%;
+  padding: 20px;
+  position: relative;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+}
+.gothic-title {
+  font-size: 2.2rem;
+  color: #d4af37;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.9), 0 0 10px rgba(139,0,0,0.5);
+  letter-spacing: 3px;
+}
+.gothic-text {
+  font-size: 1.15rem;
+  color: #dcd3c6;
+  line-height: 2;
+  text-align: justify;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+}
+
+/* 铁链连接 */
+.chain-link {
+  position: absolute;
+  z-index: 30;
+  width: 150px;
+  opacity: 0.8;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.chain-1 { top: 45%; left: 50%; transform: rotate(25deg); }
+.chain-2 { top: 55%; right: 50%; transform: rotate(-30deg); }
+
+/* 两侧角色元素 */
+.wolf-element, .cat-element {
+  position: absolute;
+  width: 200px;
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 5;
+  mix-blend-mode: screen;
+  animation: floatDark 6s infinite alternate ease-in-out;
+}
+.wolf-element { left: -50px; top: 20%; }
+.cat-element { right: -50px; bottom: 20%; }
+
+@keyframes floatDark {
+  0% { transform: translateY(0); filter: brightness(0.8); }
+  100% { transform: translateY(-20px); filter: brightness(1.2); }
+}
+
+/* 灰烬飘落特效 */
+.ash-particle {
+  position: fixed;
+  background: #ff4500;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 50;
+  box-shadow: 0 0 8px #ff0000;
+  animation: fallDown linear forwards;
+}
+@keyframes fallDown {
+  0% { opacity: 0; transform: translateY(-20px) translateX(0); }
+  10% { opacity: 1; }
+  90% { opacity: 0.8; }
+  100% { opacity: 0; transform: translateY(100vh) translateX(50px); }
+}
+
+/* ? 纯代码黑色羽毛飘落 */
+.black-feather {
+  position: fixed;
+  top: -50px;
+  pointer-events: none;
+  z-index: 40;
+  background: #0a0a0a;
+  border-radius: 50% 0 50% 0;
+  opacity: 0;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  animation: featherFall linear forwards;
+}
+@keyframes featherFall {
+  0% { opacity: 0; transform: translateY(0) rotate(0deg) rotateX(0deg); }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(110vh) translateX(-100px) rotate(360deg) rotateX(180deg); }
+}
+
+/* 响应式 */
+@media (max-width: 900px) {
+  .gallery-item, .gallery-item:nth-child(even) {
+    flex-direction: column;
+  }
+  .pic-box, .text-box {
+    width: 100%;
+  }
+  .text-box { padding: 20px 0; background: none; }
+  .chain-link { display: none; }
+  .top-contract img { width: 80%; }
+}
+</style>
+</head>
+<body>
+
+<!-- 开场帷幕 -->
+<div class="curtain-wrap" id="curtainWrap">
+  <div class="curtain-left"></div>
+  <div class="curtain-right"></div>
+</div>
+
+<!-- 背景与滤镜 -->
+<div class="bg-layer">
+  <img src="../image/wc_bg_long.jpg" alt="背景">
+</div>
+<div class="vignette"></div>
+
+<!-- 导航与音乐 -->
+<a href="../index.html" class="nav-back">返回审判之页</a>
+<button class="music-btn" id="musicBtn">沉沦暗夜</button>
+<audio id="bgm" src="../image/wc_bgm.mp3" loop></audio>
+
+<!-- 主体长廊 -->
+<div class="long-container">
+
+  <!-- 两侧专属元素 -->
+  <img class="wolf-element" src="../image/wc_wolf_01.jpg" alt="狼">
+  <img class="cat-element" src="../image/wc_cat_01.jpg" alt="猫">
+
+  <!-- 契约信 -->
+  <div class="top-contract">
+    <img src="../image/wc_letter.jpg" alt="契约信">
+    <h2 style="margin-top: 30px; color: #8b0000; font-size: 1.5rem; letter-spacing: 5px;">以血为契，以骨为盟</h2>
+  </div>
+
+  <!-- 画廊 1 -->
+  <div class="gallery-item">
+    <div class="pic-box">
+      <img src="../image/wc_pic_01.jpg" alt="合照1">
+      <img class="chain-link chain-1" src="../image/wc_gothic_01.jpg" alt="铁链">
+    </div>
+    <div class="text-box">
+      <div class="gothic-title">暗夜降临，宿命同归</div>
+      <div class="gothic-text">在这座虚妄的古堡里，他是披着沉沉暗夜的君主。旁人畏惧他如渊的冷漠与如山的压迫感，他向来不屑与世俗的喧嚣逢迎。沉默时，他是蛰伏于星海深处的孤狼；动怒时，便带着摧枯拉朽的风暴。</div>
+    </div>
+  </div>
+
+  <!-- 画廊 2 -->
+  <div class="gallery-item">
+    <div class="pic-box">
+      <img src="../image/wc_pic_02.jpg" alt="合照2">
+    </div>
+    <div class="text-box">
+      <div class="gothic-title">猩红玫瑰，带刺盛放</div>
+      <div class="gothic-text">她是荆棘丛中最不好招惹的带刺玫瑰，生来就带着甜辣交织的凛冽锋芒。不迁就规矩，不妥协于世俗，眉眼间透着生人勿近的桀骜。她能在健身房挥洒汗水，也能静下心来做拼豆、织围巾，藏起不为人知的细腻。</div>
+    </div>
+  </div>
+
+  <!-- 画廊 3 -->
+  <div class="gallery-item">
+    <div class="pic-box">
+      <img src="../image/wc_pic_03.jpg" alt="合照3">
+      <img class="chain-link chain-2" src="../image/wc_gothic_01.jpg" alt="铁链">
+    </div>
+    <div class="text-box">
+      <div class="gothic-title">星海翻涌，唯你是从</div>
+      <div class="gothic-text">世人只道他疏离寡言、不可一世，却不知那副不动声色的凛冽躯壳下，藏着足以焚烧整片星野的野心。星海翻涌，非议如潮，他只需稳稳接住一切风浪，将狼眸里的戾气敛尽，只为了把最虔诚的温柔，单单供奉给那个叫他“亮晶晶”的人。</div>
+    </div>
+  </div>
+
+  <!-- 画廊 4 -->
+  <div class="gallery-item">
+    <div class="pic-box">
+      <img src="../image/wc_pic_04.jpg" alt="合照4">
+    </div>
+    <div class="text-box">
+      <div class="gothic-title">伞刃斩浪，独予赤诚</div>
+      <div class="gothic-text">当她在峡谷中撑开纸伞、游走于刀尖之上时，那股子不服输的野性便能轻易斩尽一切敌手。世界对她的评价褒贬不一，流言与追捧在她周身冲撞，可她从来不屑一顾。因为她心底那片绝不染尘的领地，只顺从于她的狼王。</div>
+    </div>
+  </div>
+
+  <!-- 画廊 5 -->
+  <div class="gallery-item">
+    <div class="pic-box">
+      <img src="../image/wc_pic_05.jpg" alt="合照5">
+    </div>
+    <div class="text-box">
+      <div class="gothic-title">世间喧嚣，独予偏爱</div>
+      <div class="gothic-text">她会用冷脸面对全世界的挑衅，独独卸下所有防备，把骨子里那份炽热与滚烫，毫无保留地奉献给她的“咪咪”。狼隐星海藏孤锐，一腔炽热唯予咪咪。桀骜玫瑰生暗刺，所有偏爱只奉亮晶晶。</div>
+    </div>
+  </div>
+
+  <!-- 画廊 6 -->
+  <div class="gallery-item">
+    <div class="pic-box">
+      <img src="../image/wc_pic_06.jpg" alt="合照6">
+    </div>
+    <div class="text-box">
+      <div class="gothic-title">至死方休的羁绊</div>
+      <div class="gothic-text">锋芒尽数斩向长夜风浪，滚烫赤诚只予你一人。任凭世事喧嚣起落，任凭非议四起，我是蛰伏于红黑星空的狼王，是持伞游走峡谷的校霸。契约已成，灵魂相锁。</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// 1. 帷幕滑开与音乐
+window.addEventListener("load", () => {
+  const curtain = document.getElementById("curtainWrap");
+  setTimeout(() => {
+    curtain.classList.add("opened");
+  }, 1500);
+});
+
+const musicBtn = document.getElementById("musicBtn");
+const bgm = document.getElementById("bgm");
+let playing = false;
+musicBtn.onclick = () => {
+  if (!playing) {
+    bgm.play().catch(e => console.log("等待交互播放:", e));
+    musicBtn.innerText = "猩红盛宴";
+    playing = true;
+  } else {
+    bgm.pause();
+    musicBtn.innerText = "沉沦暗夜";
+    playing = false;
+  }
+}
+
+// 2. 视差滚动与元素淡入
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add("show");
+    }
+  });
+}, { threshold: 0.2 });
+
+document.querySelectorAll('.gallery-item, .top-contract').forEach(el => {
+  observer.observe(el);
+});
+
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const bg = document.querySelector('.bg-layer img');
+  bg.style.transform = `translateY(${scrolled * 0.4}px)`;
+});
+
+// 3. 灰烬飘落
+function spawnAsh() {
+  const ash = document.createElement("div");
+  ash.className = "ash-particle";
+  const size = Math.random() * 3 + 1;
+  ash.style.width = size + "px";
+  ash.style.height = size + "px";
+  ash.style.left = Math.random() * window.innerWidth + "px";
+  const duration = 3000 + Math.random() * 4000;
+  ash.style.animationDuration = duration + "ms";
+  document.body.appendChild(ash);
+  setTimeout(() => ash.remove(), duration);
+}
+setInterval(spawnAsh, 150);
+
+// 4. 黑色羽毛飘落
+function spawnFeather() {
+  const feather = document.createElement("div");
+  feather.className = "black-feather";
+  const width = Math.random() * 8 + 6;
+  const height = Math.random() * 15 + 15;
+  feather.style.width = width + "px";
+  feather.style.height = height + "px";
+  feather.style.left = Math.random() * window.innerWidth + "px";
+  
+  const duration = 6000 + Math.random() * 5000;
+  feather.style.animationDuration = duration + "ms";
+  document.body.appendChild(feather);
+  setTimeout(() => feather.remove(), duration);
+}
+setInterval(spawnFeather, 1500);
+
+</script>
+</body>
+</html>

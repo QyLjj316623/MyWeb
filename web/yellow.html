@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>狐狸 · 鎏光幻晤</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  font-family: "Microsoft Yahei", "PingFang SC", serif;
+  background-color: #d86c28; /* 底部橙色兜底 */
+}
+/* 背景 */
+.bg-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+.bg-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+/* 导航按钮 */
+.nav-back {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 100;
+  padding: 10px 18px;
+  background: rgba(255, 248, 235, 0.75);
+  border-radius: 999px;
+  text-decoration: none;
+  color: #8b4513;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: 0.2s;
+}
+.nav-back:hover {
+  background: rgba(255, 248, 235, 0.95);
+}
+.music-btn {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 100;
+  padding: 10px 18px;
+  background: rgba(255, 248, 235, 0.75);
+  border-radius: 999px;
+  border: none;
+  color: #8b4513;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: 0.2s;
+}
+.music-btn:hover {
+  background: rgba(255, 248, 235, 0.95);
+}
+
+/* 主体容器 */
+.container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 30px;
+}
+
+/* 标题区域 */
+.title-block {
+  text-align: center;
+  margin-bottom: 60px;
+}
+.title-block img {
+  max-width: 750px;
+  width: 90%;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+}
+.subtitle {
+  margin-top: 16px;
+  font-size: 1.6rem;
+  color: #fff8dc;
+  letter-spacing: 3px;
+  font-weight: bold;
+  text-shadow: 1px 1px 4px rgba(139, 69, 19, 0.8), 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* 贴画容器：留足高度给图片和文字排布 */
+.sticker-wrap {
+  position: relative;
+  min-height: 1100px;
+  margin-bottom: 80px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 狐狸人物贴画 */
+.fox-sticker {
+  position: absolute;
+  width: 220px;
+  transition: transform 0.3s ease;
+  /* 时间缩短至 4.5s，摇摆更快 */
+  animation: windSwing 4.5s ease-in-out infinite;
+  z-index: 12;
+  filter: drop-shadow(4px 8px 12px rgba(0,0,0,0.3));
+}
+.fox-sticker:nth-child(2) { animation-duration: 5.2s; animation-delay: 0.4s; }
+.fox-sticker:nth-child(3) { animation-duration: 4.2s; animation-delay: 0.8s; }
+.fox-sticker:nth-child(4) { animation-duration: 5.0s; animation-delay: 1.2s; }
+.fox-sticker:nth-child(5) { animation-duration: 5.5s; animation-delay: 1.6s; }
+.fox-sticker:nth-child(6) { animation-duration: 4.8s; animation-delay: 2s; }
+
+@keyframes windSwing {
+  /* 幅度从 2.5deg 加大到 6deg */
+  0% { transform: rotate(var(--base-rotate,0deg)) translate(0,0); }
+  50% { transform: rotate(calc(var(--base-rotate,0deg) + 6deg)) translate(8px, -5px); }
+  100% { transform: rotate(var(--base-rotate,0deg)) translate(0,0); }
+}
+.fox-sticker:hover {
+  transform: scale(1.06) rotate(var(--base-rotate,0deg));
+  z-index: 20;
+}
+
+/* 氛围素材小贴纸 */
+.atmo-sticker {
+  position: absolute;
+  transition: transform 0.3s ease;
+  animation: softSway 5s ease-in-out infinite;
+  z-index: 2; /* 层级在背景上，人物和文字下 */
+  opacity: 0.85;
+  pointer-events: none;
+  mix-blend-mode: multiply; /* 让贴纸融进橙底 */
+}
+.atmo-sticker:nth-child(odd) { animation-duration: 6s; }
+.atmo-sticker:nth-child(even) { animation-duration: 5s; }
+
+@keyframes softSway {
+  /* 幅度稍微加大到 4deg */
+  0% { transform: rotate(var(--base-rotate,0deg)) translate(0,0); }
+  50% { transform: rotate(calc(var(--base-rotate,0deg) + 4deg)) translate(5px, -3px); }
+  100% { transform: rotate(var(--base-rotate,0deg)) translate(0,0); }
+}
+
+/* 粉笔大字与小字 */
+.chalk-text {
+  position: absolute;
+  z-index: 15; /* 文字在人物图之上，防遮挡 */
+  pointer-events: none;
+}
+.chalk-big {
+  color: #fff8dc;
+  font-size: 1.8rem; /* 稍微大一点 */
+  font-family: "KaiTi", "STKaiti", "Comic Sans MS", serif;
+  text-shadow: 1px 2px 0px rgba(139, 69, 19, 0.9), 0 0 8px rgba(255, 215, 0, 0.6);
+  filter: url(#chalk);
+  line-height: 1.4;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+.chalk-small {
+  margin-top: 8px;
+  color: #ffebcd;
+  font-size: 1rem; /* 介绍字 */
+  line-height: 1.6;
+  max-width: 260px;
+  text-shadow: 1px 1px 3px rgba(139, 69, 19, 0.8);
+  letter-spacing: 1px;
+}
+
+/* 契约独立区块 */
+.contract-area {
+  position: relative;
+  z-index: 1000; /* 确保在视频表情包之上 */
+  margin: 60px auto 80px;
+  max-width: 820px;
+  padding: 36px;
+  background: rgba(255, 248, 235, 0.15);
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.contract-title {
+  text-align: center;
+  font-size: 2rem;
+  color: #fff8dc;
+  margin-bottom: 24px;
+  text-shadow: 1px 1px 4px #8b4513;
+  font-family: "KaiTi", serif;
+}
+.contract-text {
+  color: #ffebcd;
+  line-height: 1.9;
+  font-size: 1.05rem;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+.contract-btn-wrap {
+  text-align: center;
+  margin-top: 32px;
+}
+.contract-btn {
+  padding: 12px 28px;
+  background: rgba(255, 236, 200, 0.85);
+  border-radius: 999px;
+  color: #8b4513;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  transition: 0.25s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.contract-btn:hover {
+  background: rgba(255, 248, 235, 1);
+  transform: translateY(-2px);
+}
+
+/* 鼠标拖尾表情包 */
+.emoji-item {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999;
+  /* 停留时间加长至 1.8s */
+  animation: windFloat 1.8s ease-out forwards;
+}
+@keyframes windFloat {
+  0% {opacity: 0.9; transform: translate(0,0) scale(var(--s,1));}
+  100% {opacity: 0; transform: translate(60px, -90px) scale(calc(var(--s,1)*0.4));}
+}
+
+/* 弹出视频表情包 */
+.video-pop {
+  position: fixed;
+  pointer-events: none;
+  z-index: 998;
+  width: 160px;
+  border-radius: 12px;
+  animation: vidFade 2.6s ease-out forwards;
+}
+@keyframes vidFade {
+  0% {opacity: 0; transform: scale(0.7);}
+  15% {opacity: 1; transform: scale(1);}
+  85% {opacity: 1;}
+  100% {opacity: 0; transform: scale(0.35);}
+}
+
+/* 金橙色星点上升特效 */
+.wind-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 50%;
+  background: #ffd700;
+  box-shadow: 0 0 8px #ffa500;
+  animation: particleDrift linear forwards;
+}
+@keyframes particleDrift {
+  0% { opacity: 0; transform: translate(0, 0); }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.6; }
+  100% { opacity: 0; transform: translate(var(--dx, 50px), -100vh); }
+}
+
+svg.filter-def {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* 响应式调整 */
+@media (max-width: 900px) {
+  .sticker-wrap { min-height: 1300px; }
+  .fox-sticker { width: 180px; }
+  .chalk-big { font-size: 1.5rem; }
+  .chalk-small { max-width: 200px; font-size: 0.9rem; }
+}
+</style>
+</head>
+<body>
+<!-- 粉笔滤镜 -->
+<svg class="filter-def">
+  <defs>
+    <filter id="chalk">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.4"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- 背景 -->
+<div class="bg-wrap">
+  <img src="../image/fox_bg.jpg" alt="橙色背景">
+</div>
+
+<!-- 导航与音乐 -->
+<a href="../index.html" class="nav-back">返回审判之页</a>
+<button class="music-btn" id="musicBtn">听一阵橙风</button>
+<!-- 确保 audio 已闭合 -->
+<audio id="bgm" src="../image/fox_bgm.mp3" loop></audio>
+
+<div class="container">
+  <!-- 标题区 -->
+  <div class="title-block">
+    <img src="../image/fox_title.jpg" alt="狐狸 · 鎏光幻晤">
+    <div class="subtitle">借一阵橙风，做密林的君王</div>
+  </div>
+
+  <div class="sticker-wrap">
+    
+    <!-- 4张氛围素材图 (层级 z-index: 2) -->
+    <img class="atmo-sticker" src="../image/fox_atmo_01.jpg" style="top: 40px; left: 2%; width: 120px; --base-rotate: -8deg;">
+    <img class="atmo-sticker" src="../image/fox_atmo_02.jpg" style="top: 380px; left: 85%; width: 140px; --base-rotate: 6deg;">
+    <img class="atmo-sticker" src="../image/fox_atmo_03.jpg" style="top: 680px; left: 35%; width: 150px; --base-rotate: -4deg;">
+    <img class="atmo-sticker" src="../image/fox_atmo_04.jpg" style="top: 880px; left: 80%; width: 120px; --base-rotate: 10deg;">
+
+    <!-- 6组：个人照 (层级 z-index: 12) + 文字 (层级 z-index: 15) -->
+    
+    <!-- 第1组：左上 -->
+    <img class="fox-sticker" src="../image/fox_pic_01.jpg" style="top: 30px; left: 10%; --base-rotate: -6deg;">
+    <div class="chalk-text" style="top: 60px; left: 32%;">
+      <div class="chalk-big">风之领主，万兽俯首。</div>
+      <div class="chalk-small">别看它毛茸茸一团，甚至有点贪玩。但这片密林的法则，由它亲自书写。风之所向，皆是它的疆土。</div>
+    </div>
+
+    <!-- 第2组：右上 -->
+    <img class="fox-sticker" src="../image/fox_pic_02.jpg" style="top: 150px; left: 65%; --base-rotate: 5deg;">
+    <div class="chalk-text" style="top: 180px; left: 40%; text-align: right;">
+      <div class="chalk-big">狐影掠过，百草低伏。</div>
+      <div class="chalk-small" style="margin-left: auto;">裹着最软的笑，藏着最傲的骨。它无需拔剑，只需一个眼神，密林深处的法则便会自动生效。</div>
+    </div>
+
+    <!-- 第3组：左中 -->
+    <img class="fox-sticker" src="../image/fox_pic_03.jpg" style="top: 400px; left: 15%; --base-rotate: -3deg;">
+    <div class="chalk-text" style="top: 430px; left: 36%;">
+      <div class="chalk-big">王权无须加冕。</div>
+      <div class="chalk-small">散漫是它的伪装，狡黠是它的武器。你以为它在闲逛，其实它在巡视它的无上王座。</div>
+    </div>
+
+    <!-- 第4组：右中 -->
+    <img class="fox-sticker" src="../image/fox_pic_04.jpg" style="top: 520px; left: 70%; --base-rotate: 7deg;">
+    <div class="chalk-text" style="top: 550px; left: 45%; text-align: right;">
+      <div class="chalk-big">步步皆王土，缕缕皆臣风。</div>
+      <div class="chalk-small" style="margin-left: auto;">哪怕只是追逐一片落叶，也尽在运筹帷幄之中。别试图挑战它的权威，因为连风都会替它盯梢。</div>
+    </div>
+
+    <!-- 第5组：左下 -->
+    <img class="fox-sticker" src="../image/fox_pic_05.jpg" style="top: 780px; left: 8%; --base-rotate: -8deg;">
+    <div class="chalk-text" style="top: 810px; left: 28%;">
+      <div class="chalk-big">统御星月，独揽流光。</div>
+      <div class="chalk-small">这片森林的晨露与晚霞，星光与月影，全都打上了它的专属烙印。它是当之无愧的暗夜君王。</div>
+    </div>
+
+    <!-- 第6组：右下 -->
+    <img class="fox-sticker" src="../image/fox_pic_06.jpg" style="top: 920px; left: 60%; --base-rotate: 3deg;">
+    <div class="chalk-text" style="top: 950px; left: 35%; text-align: right;">
+      <div class="chalk-big">且听风吟，静候王令。</div>
+      <div class="chalk-small" style="margin-left: auto;">独行的背影藏着无匹的力量。在这个橙色的狂欢里，它是绝对的主宰。所有生灵，听候差遣。</div>
+    </div>
+
+  </div>
+
+  <!-- 契约页区块 -->
+  <div class="contract-area">
+    <div class="contract-title">契约之页</div>
+    <div class="contract-text">
+      这只小狐狸，生性灵动狡黠，喜欢追着风跑。世间热闹千千万，他向来随性来去，看似跳脱散漫，好像什么都抓不住。
+      <br><br>
+      直到深海里传来一声悠长的鲸鸣……
+      <br><br>
+      旁人看不懂他跳脱外壳之下藏着的柔软，可白鲸听得懂。不必刻意迁就，不用收敛天性，一个在海面随风辗转，一个在深海静静等候，风声与浪响遥遥呼应，恰好读懂彼此心底未说出口的话。
+      <br><br>
+      是旷野和风遇见深海与浪，是不必多言的知己。狐狸依旧肆意鲜活，在橙色的天地里撒欢奔跑，但他知道，遥远深海之中，永远有属于他的共鸣。
+      <br><br>
+      风会捎去狐狸的念想，海浪会接住所有的悄悄话，岁岁如是。
+    </div>
+    <div class="contract-btn-wrap">
+      <a href="contact_fox_whale.html" class="contract-btn">前往契约之页</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// 1. 音乐开关
+const musicBtn = document.getElementById("musicBtn");
+const bgm = document.getElementById("bgm");
+let playing = false;
+musicBtn.onclick = () => {
+  if (!playing) {
+    bgm.play().catch(e => console.log("等待用户交互播放:", e));
+    musicBtn.innerText = "风不停歇";
+    playing = true;
+  } else {
+    bgm.pause();
+    musicBtn.innerText = "听一阵橙风";
+    playing = false;
+  }
+}
+
+// 2. 鼠标拖尾：12张随机表情包 (调整了大小和存活时间)
+const emojiList = [];
+for (let i = 1; i <= 12; i++) {
+  const num = i.toString().padStart(2, '0');
+  emojiList.push(`../image/fox_emoji_${num}.jpg`);
+}
+let lastEmit = 0;
+document.addEventListener("mousemove", (e) => {
+  const now = Date.now();
+  if (now - lastEmit < 80) return; // 80ms出一张
+  lastEmit = now;
+  const img = document.createElement("img");
+  img.src = emojiList[Math.floor(Math.random() * emojiList.length)];
+  img.className = "emoji-item";
+  
+  // 整体变大：基础大小 100px，随机缩放系数 0.7~1.3
+  const scale = 0.7 + Math.random() * 0.6;
+  img.style.setProperty('--s', scale);
+  img.style.width = (100 * scale) + "px";
+  
+  img.style.left = e.clientX + "px";
+  img.style.top = e.clientY + "px";
+  document.body.appendChild(img);
+  
+  // 存活时间从 1100 改为 1800，留得更久
+  setTimeout(() => img.remove(), 1800);
+});
+
+// 3. 随机位置时间弹出视频 (每个1.5秒左右)
+const videoList = [];
+for (let i = 1; i <= 6; i++) {
+  const num = i.toString().padStart(2, '0');
+  videoList.push(`../image/fox_vid_${num}.mp4`);
+}
+function popVideo() {
+  const vid = document.createElement("video");
+  vid.src = videoList[Math.floor(Math.random() * videoList.length)];
+  vid.className = "video-pop";
+  // 保证不跑到屏幕外
+  const maxX = window.innerWidth - 180;
+  const maxY = window.innerHeight - 180;
+  vid.style.left = Math.random() * maxX + "px";
+  vid.style.top = Math.random() * maxY + "px";
+  vid.autoplay = true;
+  vid.muted = true;
+  vid.playsInline = true;
+  vid.onerror = () => vid.remove(); // 防报错
+  document.body.appendChild(vid);
+  setTimeout(() => vid.remove(), 2600);
+}
+setInterval(popVideo, 1500); // 1.5秒间隔
+
+// 4. 金橙色星点向上漂浮特效 (特效3)
+function spawnParticle() {
+  const p = document.createElement("div");
+  p.className = "wind-particle";
+  const size = Math.random() * 6 + 4; // 4px ~ 10px
+  p.style.width = size + "px";
+  p.style.height = size + "px";
+  
+  // 从底部随机位置开始
+  p.style.left = Math.random() * window.innerWidth + "px";
+  p.style.top = window.innerHeight + 20 + "px";
+  
+  // 随机漂移的横向偏移
+  p.style.setProperty('--dx', (Math.random() * 200 - 100) + "px");
+  
+  const duration = 4000 + Math.random() * 5000; // 4~9秒
+  p.style.animationDuration = duration + "ms";
+  document.body.appendChild(p);
+  setTimeout(() => p.remove(), duration);
+}
+setInterval(spawnParticle, 200); // 每 200ms 生成一颗星点
+</script>
+</body>
+</html>

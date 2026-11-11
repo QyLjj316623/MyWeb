@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>四曜审判，星海共契</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(120, 170, 255, 0.18) 0%, transparent 26%),
+    radial-gradient(circle at 80% 10%, rgba(160, 200, 255, 0.12) 0%, transparent 22%),
+    radial-gradient(circle at 50% 90%, rgba(90, 130, 220, 0.15) 0%, transparent 28%),
+    linear-gradient(180deg, #0b1b3f 0%, #0a1835 45%, #071229 100%);
+  color: #fff;
+  font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+/* 深蓝点点星空 */
+.stars {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.star {
+  position: absolute;
+  background: #fff;
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  opacity: 0.75;
+  animation: twinkle 3s infinite ease-in-out;
+}
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+/* 鼠标拖尾：四角星星 */
+.cursor-trail {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  box-shadow:
+    0 0 10px #fff,
+    0 0 22px #7cb8ff,
+    0 0 40px #4f8cff;
+  pointer-events: none;
+  z-index: 4;
+  animation: trailFade 0.85s forwards ease-out;
+}
+@keyframes trailFade {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(45deg) translate(24px, -16px);
+  }
+}
+/* 横向长方形页面容器 */
+.page {
+  position: relative;
+  z-index: 2;
+  width: 90%;
+  max-width: 1200px;
+  min-height: 85vh;
+  margin: 6vh auto;
+  padding: 40px 50px;
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(19, 41, 85, 0.55), rgba(10, 24, 56, 0.55));
+  border: 1px solid rgba(150, 190, 255, 0.25);
+  box-shadow:
+    0 0 0 1px rgba(120, 170, 255, 0.08) inset,
+    0 20px 60px rgba(0, 0, 0, 0.45),
+    0 0 80px rgba(80, 130, 220, 0.15);
+}
+/* 顶部标题 */
+.title-area {
+  text-align: center;
+  margin-bottom: 40px;
+}
+h1 {
+  font-size: 40px;
+  letter-spacing: 14px;
+  color: #fff;
+  text-shadow:
+    0 0 10px rgba(160, 200, 255, 0.55),
+    0 0 22px rgba(120, 170, 255, 0.35),
+    0 0 40px rgba(80, 130, 220, 0.25);
+}
+.subtitle {
+  margin-top: 10px;
+  font-size: 14px;
+  letter-spacing: 6px;
+  color: #9fbbff;
+}
+/* 四张塔罗牌并排 */
+.tarot-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.tarot-card {
+  perspective: 1600px;
+  cursor: pointer;
+}
+.tarot-inner {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  transition: transform 1s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.tarot-card.flipped .tarot-inner {
+  transform: rotateY(180deg);
+}
+.tarot-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  border: 1px solid rgba(150, 190, 255, 0.3);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.45),
+    0 0 40px rgba(120, 170, 255, 0.18);
+}
+.tarot-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tarot-front {
+  transform: rotateY(180deg);
+}
+/* 卡牌下方文字 */
+.card-tip {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: #dce9ff;
+}
+.enter-tip {
+  display: none;
+  color: #fff;
+}
+/* 四人合影入口 */
+.four-entry-wrap {
+  text-align: center;
+  margin-top: 48px;
+}
+.four-entry {
+  display: inline-block;
+  padding: 16px 46px;
+  font-size: 22px;
+  letter-spacing: 8px;
+  color: #e8f1ff;
+  text-decoration: none;
+  border-radius: 999px;
+  border: 1px solid rgba(150, 190, 255, 0.45);
+  background: linear-gradient(135deg, rgba(30, 60, 120, 0.65), rgba(15, 35, 80, 0.65));
+  box-shadow:
+    0 0 0 1px rgba(120, 170, 255, 0.12) inset,
+    0 12px 30px rgba(0, 0, 0, 0.35),
+    0 0 40px rgba(80, 130, 220, 0.25);
+  text-shadow:
+    0 0 10px rgba(160, 200, 255, 0.65),
+    0 0 24px rgba(120, 170, 255, 0.35);
+  transition: 0.3s;
+}
+.four-entry:hover {
+  color: #fff;
+  border-color: rgba(190, 220, 255, 0.75);
+  background: linear-gradient(135deg, rgba(45, 85, 160, 0.75), rgba(20, 45, 100, 0.75));
+  box-shadow:
+    0 0 0 1px rgba(150, 190, 255, 0.2) inset,
+    0 16px 40px rgba(0, 0, 0, 0.4),
+    0 0 60px rgba(100, 160, 255, 0.4);
+  transform: translateY(-2px);
+}
+@media (max-width: 900px) {
+  .tarot-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tarot-inner {
+    height: 380px;
+  }
+}
+@media (max-width: 520px) {
+  .page {
+    padding: 30px 20px;
+  }
+  h1 {
+    font-size: 28px;
+    letter-spacing: 8px;
+  }
+  .tarot-row {
+    grid-template-columns: 1fr;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+  .tarot-inner {
+    height: 460px;
+  }
+  .four-entry {
+    font-size: 18px;
+    letter-spacing: 4px;
+    padding: 14px 28px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="page">
+  <div class="title-area">
+    <h1>四曜审判，星海共契</h1>
+    <p class="subtitle">· 誓 约 永 存 ·</p>
+  </div>
+  <div class="tarot-row">
+    <!-- 白鲸 -->
+    <div class="tarot-card" data-target="web/blue.html">
+      <div class="tarot-inner">
+        <div class="tarot-face tarot-back">
+          <img src="image/whale_back.jpg" alt="白鲸塔罗背面" />
+        </div>
+        <div class="tarot-face tarot-front">
+          <img src="image/whale_front.jpg" alt="白鲸塔罗正面" />
+        </div>
+      </div>
+      <div class="card-tip">
+        <span class="flip-tip">点击后翻页</span>
+        <span class="enter-tip">再次点击进入页面</span>
+      </div>
+    </div>
+    <!-- 黑猫 -->
+    <div class="tarot-card" data-target="web/pink_cat.html">
+      <div class="tarot-inner">
+        <div class="tarot-face tarot-back">
+          <img src="image/cat_back.jpg" alt="黑猫塔罗背面" />
+        </div>
+        <div class="tarot-face tarot-front">
+          <img src="image/cat_front.jpg" alt="黑猫塔罗正面" />
+        </div>
+      </div>
+      <div class="card-tip">
+        <span class="flip-tip">点击后翻页</span>
+        <span class="enter-tip">再次点击进入页面</span>
+      </div>
+    </div>
+    <!-- 狼王 -->
+    <div class="tarot-card" data-target="web/wolf.html">
+      <div class="tarot-inner">
+        <div class="tarot-face tarot-back">
+          <img src="image/wolf_back.jpg" alt="狼王塔罗背面" />
+        </div>
+        <div class="tarot-face tarot-front">
+          <img src="image/wolf_front.jpg" alt="狼王塔罗正面" />
+        </div>
+      </div>
+      <div class="card-tip">
+        <span class="flip-tip">点击后翻页</span>
+        <span class="enter-tip">再次点击进入页面</span>
+      </div>
+    </div>
+    <!-- 狐狸 -->
+    <div class="tarot-card" data-target="web/yellow.html">
+      <div class="tarot-inner">
+        <div class="tarot-face tarot-back">
+          <img src="image/fox_back.jpg" alt="狐狸塔罗背面" />
+        </div>
+        <div class="tarot-face tarot-front">
+          <img src="image/fox_front.jpg" alt="狐狸塔罗正面" />
+        </div>
+      </div>
+      <div class="card-tip">
+        <span class="flip-tip">点击后翻页</span>
+        <span class="enter-tip">再次点击进入页面</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 四人合影入口 -->
+  <div class="four-entry-wrap">
+    <a href="web/four.html" class="four-entry">四曜同辉，审判降临</a>
+  </div>
+</div>
+<script>
+  // 深蓝点点星光
+  const stars = document.getElementById("stars");
+  const starCount = 140;
+  for (let i = 0; i < starCount; i++) {
+    const star = document.createElement("div");
+    star.className = "star";
+    const size = Math.random() * 2.2 + 0.5;
+    star.style.width = size + "px";
+    star.style.height = size + "px";
+    star.style.left = Math.random() * 100 + "%";
+    star.style.top = Math.random() * 100 + "%";
+    star.style.animationDelay = Math.random() * 3 + "s";
+    star.style.animationDuration = (Math.random() * 2 + 2) + "s";
+    stars.appendChild(star);
+  }
+  // 鼠标拖尾四角星
+  document.addEventListener("mousemove", function (e) {
+    const trail = document.createElement("div");
+    trail.className = "cursor-trail";
+    trail.style.left = e.clientX - 7 + "px";
+    trail.style.top = e.clientY - 7 + "px";
+    document.body.appendChild(trail);
+    setTimeout(function () {
+      trail.remove();
+    }, 850);
+  });
+  // 卡牌翻牌与跳转
+  const cards = document.querySelectorAll(".tarot-card");
+  cards.forEach(function (card) {
+    card.addEventListener("click", function () {
+      if (!this.classList.contains("flipped")) {
+        this.classList.add("flipped");
+        const tip = this.querySelector(".card-tip .flip-tip");
+        const enterTip = this.querySelector(".card-tip .enter-tip");
+        if(tip) tip.style.display = "none";
+        if(enterTip) enterTip.style.display = "block";
+      } else {
+        const target = this.getAttribute("data-target");
+        if (target) {
+          window.location.href = target;
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>

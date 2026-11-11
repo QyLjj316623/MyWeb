@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>狐鲸 · 高山流水</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  min-height: 100vh;
+  background-color: #e8e4d9; /* 兜底底色 */
+  font-family: "STKaiti", "KaiTi", "楷体", "Microsoft Yahei", serif;
+  color: #3e3123;
+  overflow-x: hidden;
+  /* 自定义墨点/水滴鼠标指针 */
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C12 2 5 10 5 15C5 18.8659932 8.13400675 22 12 22C15.8659932 22 19 18.8659932 19 15C19 10 12 2 12 2Z" fill="%233e3123" opacity="0.8"/></svg>') 12 12, auto;
+}
+a, button {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C12 2 5 10 5 15C5 18.8659932 8.13400675 22 12 22C15.8659932 22 19 18.8659932 19 15C19 10 12 2 12 2Z" fill="%238b4513" opacity="1"/></svg>') 12 12, pointer !important;
+}
+
+/* 背景图（铺在最底层） */
+.bg-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+.bg-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* 导航与音乐 */
+.nav-back {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 100;
+  padding: 10px 18px;
+  background: rgba(253, 251, 247, 0.7);
+  border: 1px solid rgba(139, 69, 19, 0.2);
+  border-radius: 999px;
+  text-decoration: none;
+  color: #5c432d;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: 0.3s;
+  font-family: "Microsoft Yahei", sans-serif;
+}
+.nav-back:hover {
+  background: rgba(253, 251, 247, 0.95);
+}
+.music-btn {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 100;
+  padding: 10px 18px;
+  background: rgba(253, 251, 247, 0.7);
+  border: 1px solid rgba(139, 69, 19, 0.2);
+  border-radius: 999px;
+  color: #5c432d;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: 0.3s;
+  font-family: "Microsoft Yahei", sans-serif;
+}
+.music-btn:hover {
+  background: rgba(253, 251, 247, 0.95);
+}
+
+/* 两侧素材：固定在最外侧屏幕边缘 */
+.side-sticker {
+  position: fixed; /* 固定在屏幕视口，绝对在卷轴外 */
+  z-index: 20;
+  width: 180px;
+  opacity: 0.85;
+  pointer-events: none;
+  transition: transform 0.3s ease;
+}
+.side-sticker:hover {
+  transform: scale(1.05);
+}
+/* 白鲸在左 */
+.side-sticker.whale {
+  left: 2%; 
+}
+/* 狐狸在右 */
+.side-sticker.fox {
+  right: 2%; 
+}
+
+/* 页面主体：左右留白 */
+.scroll-container {
+  position: relative;
+  z-index: 10;
+  width: 60%; /* 宽度缩小，给两侧素材留出空间 */
+  max-width: 800px;
+  min-width: 320px;
+  margin: 80px auto;
+  max-height: 0;
+  overflow: hidden;
+  /* ✅ 卷轴展开速度调整为 30s */
+  transition: max-height 30s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.scroll-container.opened {
+  max-height: 10000px;
+}
+
+/* 卷头 */
+.scroll-head {
+  width: 100%;
+  height: 50px;
+  object-fit: fill;
+  display: block;
+  z-index: 5;
+  position: relative;
+}
+.scroll-head.bottom {
+  transform: rotate(180deg);
+  margin-top: -2px;
+}
+
+/* 宣纸内部 */
+.scroll-body {
+  position: relative;
+  background: #fdfbf7;
+  box-shadow: 
+    inset 15px 0 20px -15px rgba(0,0,0,0.15),
+    inset -15px 0 20px -15px rgba(0,0,0,0.15),
+    0 10px 30px rgba(0,0,0,0.15);
+  padding: 50px 60px;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(220, 210, 190, 0.05) 0px,
+    rgba(220, 210, 190, 0.05) 1px,
+    transparent 1px,
+    transparent 10px
+  );
+  border-left: 2px solid #eaddcb;
+  border-right: 2px solid #eaddcb;
+  overflow: hidden;
+}
+
+/* 卷内素材图 */
+.ancient-sticker {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.15;
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+
+/* 内容层级 */
+.content-layer {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 契约信 */
+.letter-wrap {
+  width: 80%;
+  margin-bottom: 40px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  border: 4px solid #fff;
+}
+.letter-wrap img {
+  width: 100%;
+  display: block;
+}
+
+/* 合照与文案 */
+.photo-block {
+  width: 100%;
+  margin-bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.photo-block img {
+  width: 70%;
+  max-width: 500px;
+  border: 6px solid #fff;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  margin-bottom: 20px;
+  border-radius: 4px;
+  transition: transform 0.4s ease;
+}
+.photo-block img:hover {
+  transform: scale(1.02);
+}
+
+/* 毛笔感文字 */
+.brush-title {
+  font-size: 1.8rem;
+  color: #2b1f13;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+  font-weight: bold;
+}
+.brush-text {
+  font-size: 1.15rem;
+  color: #4a3b2c;
+  line-height: 1.9;
+  text-align: center;
+  max-width: 80%;
+  letter-spacing: 1px;
+}
+
+/* 水墨微粒上升 */
+.ink-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 50%;
+  background: rgba(90, 75, 60, 0.15);
+  box-shadow: 0 0 6px rgba(90, 75, 60, 0.1);
+  animation: floatUp linear forwards;
+}
+@keyframes floatUp {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.8); }
+  20% { opacity: 0.8; }
+  80% { opacity: 0.6; }
+  100% { opacity: 0; transform: translate(var(--dx, 50px), -100vh) scale(1.2); }
+}
+
+/* 鼠标墨痕拖尾 */
+.ink-trail {
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  background: rgba(40, 30, 20, 0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  animation: inkFade 1s ease-out forwards;
+}
+@keyframes inkFade {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0px); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(4); filter: blur(3px); }
+}
+
+/* 响应式 */
+@media (max-width: 900px) {
+  .scroll-container { width: 85%; }
+  .side-sticker { width: 100px; }
+  .side-sticker.whale { left: 1%; }
+  .side-sticker.fox { right: 1%; }
+  .scroll-body { padding: 30px 20px; }
+  .photo-block img { width: 90%; }
+  .brush-title { font-size: 1.5rem; }
+  .brush-text { font-size: 1rem; max-width: 95%; }
+}
+</style>
+</head>
+<body>
+
+<!-- 背景 -->
+<div class="bg-wrap">
+  <img src="../image/bw_bg.jpg" alt="背景">
+</div>
+
+<!-- 导航与音乐 -->
+<a href="../index.html" class="nav-back">返回审判之页</a>
+<button class="music-btn" id="musicBtn">抚琴候知音</button>
+<audio id="bgm" src="../image/guzheng.mp3" loop></audio>
+
+<!-- 两侧素材（绝对在卷轴外） -->
+<img class="side-sticker whale" src="../image/bw_whale_01.jpg" style="top: 15%;">
+<img class="side-sticker whale" src="../image/bw_whale_02.jpg" style="top: 60%;">
+<img class="side-sticker fox" src="../image/bw_fox_01.jpg" style="top: 25%;">
+<img class="side-sticker fox" src="../image/bw_fox_02.jpg" style="top: 70%;">
+
+<!-- 主体卷轴 -->
+<div class="scroll-container" id="scrollContainer">
+  
+  <!-- 上卷头 -->
+  <img class="scroll-head" src="../image/bw_scroll_head.jpg" alt="上卷头">
+
+  <!-- 卷轴中间宣纸区 -->
+  <div class="scroll-body">
+    
+    <!-- 古风浅色素材 -->
+    <img class="ancient-sticker" src="../image/bw_ancient_01.jpg" style="top: 5%; left: -5%; width: 300px; transform: rotate(-15deg);">
+    <img class="ancient-sticker" src="../image/bw_ancient_02.jpg" style="top: 35%; right: -10%; width: 350px; transform: rotate(20deg);">
+    <img class="ancient-sticker" src="../image/bw_ancient_03.jpg" style="top: 65%; left: 0%; width: 250px; transform: rotate(10deg);">
+    <img class="ancient-sticker" src="../image/bw_ancient_04.jpg" style="bottom: 5%; right: 5%; width: 200px; transform: rotate(-5deg);">
+
+    <div class="content-layer">
+      <!-- 契约信（最开头） -->
+      <div class="letter-wrap">
+        <img src="../image/bw_letter.jpg" alt="契约信">
+      </div>
+
+      <!-- 合照 1 -->
+      <div class="photo-block">
+        <img src="../image/bw_pic_01.jpg" alt="狐鲸合照1">
+        <div class="brush-title">风过林梢，鲸游深海</div>
+        <div class="brush-text">世间的喧嚣在此刻褪去。一个是旷野自由的风，一个是深海沉静的水，本无交集，却因一段无声的共鸣，听懂了彼此心底的波澜。</div>
+      </div>
+
+      <!-- 合照 2 -->
+      <div class="photo-block">
+        <img src="../image/bw_pic_02.jpg" alt="狐鲸合照2">
+        <div class="brush-title">知音一曲，无关俗世</div>
+        <div class="brush-text">旁人只道狐狸跳脱不羁，白鲸孤傲清冷。可当橙色的落叶飘落海面，海浪的回音便有了温暖的形状。高山流水，不必多言，皆在弦外。</div>
+      </div>
+
+      <!-- 合照 3 -->
+      <div class="photo-block">
+        <img src="../image/bw_pic_03.jpg" alt="狐鲸合照3">
+        <div class="brush-title">风捎去念，浪接住音</div>
+        <div class="brush-text">距离隔开的是凡尘，隔不开的是默契。狐狸在密林中奔跑，依然能感觉到海的潮汐；白鲸在深渊里游弋，亦能听见风的期许。</div>
+      </div>
+
+      <!-- 合照 4 -->
+      <div class="photo-block">
+        <img src="../image/bw_pic_04.jpg" alt="狐鲸合照4">
+        <div class="brush-title">一琴一瑟，岁月温润</div>
+        <div class="brush-text">伯牙子期，遇之我幸。不用刻意收敛天性，也不用迎合世俗。风还是那样的肆意，海还是那样的温柔，这便是最好的相守。</div>
+      </div>
+
+      <!-- 合照 5 -->
+      <div class="photo-block">
+        <img src="../image/bw_pic_05.jpg" alt="狐鲸合照5">
+        <div class="brush-title">岁岁如是，静水流深</div>
+        <div class="brush-text">岁月绵长，这段羁绊落在纸上，成了永不褪色的契约。风起时，海浪会接住所有的悄悄话。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 下卷头 -->
+  <img class="scroll-head bottom" src="../image/bw_scroll_head.jpg" alt="下卷头">
+
+</div>
+
+<script>
+// 音乐开关
+const musicBtn = document.getElementById("musicBtn");
+const bgm = document.getElementById("bgm");
+let playing = false;
+musicBtn.onclick = () => {
+  if (!playing) {
+    bgm.play().catch(e => console.log("等待交互播放:", e));
+    musicBtn.innerText = "琴瑟共鸣时";
+    playing = true;
+  } else {
+    bgm.pause();
+    musicBtn.innerText = "抚琴候知音";
+    playing = false;
+  }
+}
+
+// 卷轴展开动画
+window.addEventListener("load", () => {
+  const scroll = document.getElementById("scrollContainer");
+  setTimeout(() => {
+    scroll.classList.add("opened");
+  }, 300);
+});
+
+// 特效2：水墨微粒上升
+function spawnInkParticle() {
+  const p = document.createElement("div");
+  p.className = "ink-particle";
+  const size = Math.random() * 8 + 4;
+  p.style.width = size + "px";
+  p.style.height = size + "px";
+  
+  p.style.left = Math.random() * window.innerWidth + "px";
+  p.style.top = window.innerHeight + 20 + "px";
+  p.style.setProperty('--dx', (Math.random() * 100 - 50) + "px");
+  
+  const duration = 6000 + Math.random() * 4000;
+  p.style.animationDuration = duration + "ms";
+  document.body.appendChild(p);
+  
+  setTimeout(() => p.remove(), duration);
+}
+setInterval(spawnInkParticle, 400);
+
+// 特效5：鼠标墨痕拖尾
+let lastTrailTime = 0;
+document.addEventListener("mousemove", (e) => {
+  const now = Date.now();
+  // 控制生成频率，避免拖尾太密集
+  if (now - lastTrailTime < 40) return;
+  lastTrailTime = now;
+
+  const trail = document.createElement("div");
+  trail.className = "ink-trail";
+  // 墨点有大小随机变化
+  const size = 8 + Math.random() * 10;
+  trail.style.width = size + "px";
+  trail.style.height = size + "px";
+  trail.style.left = e.clientX + "px";
+  trail.style.top = e.clientY + "px";
+  
+  document.body.appendChild(trail);
+  
+  // 1秒后自动清理
+  setTimeout(() => {
+    trail.remove();
+  }, 1000);
+});
+</script>
+</body>
+</html>
